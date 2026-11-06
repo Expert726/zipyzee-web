@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
+/*
+ * The lime look, from the app's src/theme/tokens.ts (light + dark). Never hard-code colours in components: use these
+ * through Tailwind (bg-surface, text-muted, ...) or var(--x). data-theme on <html> is set before paint by the inline
+ * script in app/[lang]/layout.tsx: "light", "dark", or missing = follow the system.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --primary: #3f7d1c;
+  --primary-pressed: #2f6414;
+  --primary-soft: #cff26b4d;
+  --background: #fafbf6;
+  --surface: #ffffff;
+  --text: #121212;
+  --text-secondary: #6b6e66;
+  --text-muted: #4a4d45;
+  --border: #e8eae2;
+  --border-strong: #d3d6cb;
+  --fill: #f1f2ec;
+  --fill-strong: #e8eae2;
+  --success: #16a34a;
+  --success-soft: #f0fdf4;
+  --warning-text: #b45309;
+  --warning-soft: #fffbeb;
+  --info-soft: #ecf9c2;
+  --info-ink: #3f4d12;
+  --error: #b91c1c;
+  --danger-soft: #fee2e2;
+  --ink: #cff26b;
+  --on-ink: #121212;
+  --ink-muted: #4a5a1a;
+  --glow-from: #dceea4;
+  --lime-from: #cff26b;
+  --lime-to: #e4f3b0;
+  --brand-green: #5fa336;
+  --overlay: #12121266;
+  --paper: #ffffff;
+  --paper-ink: #111827;
+  --shadow-soft: 0px 6px 20px rgba(95, 140, 40, 0.12);
+  --shadow-raised: 0px 6px 16px rgba(18, 18, 18, 0.18);
+  --card-border: transparent;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --primary: #5a9e33;
+    --primary-pressed: #4a8a28;
+    --primary-soft: #cff26b26;
+    --background: #0e0f0c;
+    --surface: #1a1b17;
+    --text: #f3f4ee;
+    --text-secondary: #a3a69b;
+    --text-muted: #c9ccbf;
+    --border: #2e3029;
+    --border-strong: #3d4037;
+    --fill: #24261f;
+    --fill-strong: #2e3029;
+    --success: #22c55e;
+    --success-soft: #14291d;
+    --warning-text: #fbbf24;
+    --warning-soft: #2a2114;
+    --info-soft: #1e2410;
+    --info-ink: #d9f59a;
+    --error: #f87171;
+    --danger-soft: #3b1d1d;
+    --glow-from: #26301a;
+    --brand-green: #7cc24e;
+    --overlay: #000000a6;
+    --shadow-soft: 0px 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-raised: 0px 6px 16px rgba(0, 0, 0, 0.54);
+    --card-border: #2e3029;
+    color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --primary: #5a9e33;
+  --primary-pressed: #4a8a28;
+  --primary-soft: #cff26b26;
+  --background: #0e0f0c;
+  --surface: #1a1b17;
+  --text: #f3f4ee;
+  --text-secondary: #a3a69b;
+  --text-muted: #c9ccbf;
+  --border: #2e3029;
+  --border-strong: #3d4037;
+  --fill: #24261f;
+  --fill-strong: #2e3029;
+  --success: #22c55e;
+  --success-soft: #14291d;
+  --warning-text: #fbbf24;
+  --warning-soft: #2a2114;
+  --info-soft: #1e2410;
+  --info-ink: #d9f59a;
+  --error: #f87171;
+  --danger-soft: #3b1d1d;
+  --glow-from: #26301a;
+  --brand-green: #7cc24e;
+  --overlay: #000000a6;
+  --shadow-soft: 0px 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-raised: 0px 6px 16px rgba(0, 0, 0, 0.54);
+  --card-border: #2e3029;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-pressed: var(--primary-pressed);
+  --color-primary-soft: var(--primary-soft);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning-text);
+  --color-warning-soft: var(--warning-soft);
+  --color-info-soft: var(--info-soft);
+  --color-info-ink: var(--info-ink);
+  --color-error: var(--error);
+  --color-danger-soft: var(--danger-soft);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-brand: var(--brand-green);
+  --color-overlay: var(--overlay);
+  --color-paper: var(--paper);
+  --color-paper-ink: var(--paper-ink);
+  --font-sans: var(--font-poppins), var(--font-naskh), ui-sans-serif, system-ui, sans-serif;
+  /* lime shapes: cards 24, rows 20, tiles 16, buttons pills */
+  --radius-card: 24px;
+  --radius-row: 20px;
+  --radius-tile: 16px;
+  --shadow-soft: var(--shadow-soft);
+  --shadow-raised: var(--shadow-raised);
+}
+
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Urdu: a little more line height (marks above and below the line) */
+html[lang="ur"] body {
+  line-height: 1.8;
+}
+
+/* The lime-yellow glow from the top behind every page (the app's Screen) */
+.lime-glow {
+  background: linear-gradient(180deg, var(--glow-from) 0%, var(--background) 520px);
+}
+
+/* Primary pill: the lime gradient (the app's LimeFill) */
+.lime-fill {
+  background: linear-gradient(90deg, var(--lime-from), var(--lime-to));
+  color: var(--on-ink);
+}
+
+/* White cards lift with a soft green glow; borders only in dark */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--card-border);
+}
+
+/* Arrows and chevrons point the other way in Urdu */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

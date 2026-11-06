@@ -1,0 +1,25 @@
+// Urdu for text only the web site shows. The app's dictionary (./ur.ts, a copy of the app's src/i18n/ur.ts) is
+// checked first; don't repeat its keys here (__tests__/i18n.test.ts checks). Proofread by a native speaker before launch.
+export const urWeb: Record<string, string> = {
+  "Merge, split and compress PDFs, resize and convert photos. Free, and your files never leave your computer.": "PDF جوڑیں، الگ کریں اور چھوٹی کریں، تصاویر کا سائز اور فارمیٹ بدلیں۔ مفت، اور آپ کی فائلیں آپ کے کمپیوٹر سے باہر نہیں جاتیں۔",
+  "See all tools": "تمام ٹولز دیکھیں",
+  "Files stay on your computer": "فائلیں آپ کے کمپیوٹر پر رہتی ہیں",
+  "No sign-up": "سائن اپ کی ضرورت نہیں",
+  "Free, no watermark": "مفت، کوئی واٹر مارک نہیں",
+  "Coming to the web soon": "جلد ویب پر آ رہا ہے",
+  "This tool works in the ZipyZee Android app today.": "یہ ٹول آج ہی ZipyZee اینڈرائیڈ ایپ میں کام کرتا ہے۔",
+  "Get the Android app": "اینڈرائیڈ ایپ حاصل کریں",
+  "Your files are processed in your browser and never uploaded.": "آپ کی فائلیں آپ کے براؤزر میں ہی تیار ہوتی ہیں اور کبھی اپ لوڈ نہیں ہوتیں۔",
+  "Light theme": "ہلکی تھیم",
+  "Dark theme": "گہری تھیم",
+  "Choose at least {count} files": "کم از کم {count} فائلیں منتخب کریں",
+  "or drop them here": "یا انہیں یہاں چھوڑ دیں",
+  "Choose files": "فائلیں منتخب کریں",
+  "That didn't work": "یہ کام نہیں ہوا",
+  "Start over": "دوبارہ شروع کریں",
+  "Download all": "سب ڈاؤن لوڈ کریں",
+  "Next: {name}": "اگلا: {name}",
+  "Your files": "آپ کی فائلیں",
+  "Options": "اختیارات",
+  "Cancelled": "منسوخ کر دیا گیا",
+};

@@ -37,7 +37,7 @@ export function AllTools() {
       {sections.map(({ c, tools }) => (
         <section key={c} id={c} className="mb-10 scroll-mt-6" aria-labelledby={`h-${c}`}>
           <h2 id={`h-${c}`} className="text-[17px] font-semibold mb-3">{t(CATEGORY_NAMES[c])}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {tools.map((x) => <ToolCard key={x.id} tool={x} lang={lang} />)}
           </div>
         </section>

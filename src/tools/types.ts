@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import type { CompareOutput } from './compare';
 
 export type CategoryId = 'pdf' | 'image' | 'scan' | 'convert' | 'everyday' | 'ai';
 
@@ -36,12 +37,21 @@ export type Choice = { label: string; value: string };
 export type OptionField =
   | { kind: 'segmented'; key: string; label: string; options: Choice[]; default: string }
   | { kind: 'toggle'; key: string; label: string; sub?: string; default: boolean }
-  | { kind: 'chips'; key: string; label: string; options: Choice[]; default: string }
-  | { kind: 'text'; key: string; label: string; default: string; hint?: string; placeholder?: string; numeric?: boolean }
+  /** `multi`: several can be on (the value is the chosen values, kept in the options' order) */
+  | { kind: 'chips'; key: string; label: string; options: Choice[]; default: string | string[]; multi?: boolean }
+  /** `secure`: a password box with a show / hide eye */
+  | { kind: 'text'; key: string; label: string; default: string; hint?: string; placeholder?: string; numeric?: boolean; secure?: boolean; suffix?: string }
   | { kind: 'slider'; key: string; label: string; min: number; max: number; step?: number; default: number; unit?: string }
-  | { kind: 'note'; text: string };
+  | { kind: 'note'; text: string }
+  /** one choice from labelled groups (Resize presets by platform); `hint` shows under each label (its size) */
+  | { kind: 'groups'; key: string; label: string; default: string; groups: { label: string; options: (Choice & { hint?: string })[] }[] }
+  /** colour swatches ('#RRGGBB') */
+  | { kind: 'color'; key: string; label: string; colors: string[]; default: string }
+  /** one picked image (a logo); the value is the File, or null */
+  | { kind: 'image'; key: string; label: string; change: string; hint?: string; default: null };
 
-export type OptionValue = string | number | boolean;
+/** A field's value; tool editors (Organize...) pass their own objects. */
+export type OptionValue = string | number | boolean | File | null | object;
 export type OptionValues = Record<string, OptionValue>;
 
 export type ToolOptions = {
@@ -53,7 +63,8 @@ export type ToolOptions = {
 
 // ---- handlers ----
 export type OutputFile = { name: string; blob: Blob };
-export type ToolResult = { title: string; subtitle?: string; files: OutputFile[] };
+/** `zipName`: what "Download all" calls the ZIP of several files (default: from the first file's name). */
+export type ToolResult = { title: string; subtitle?: string; files: OutputFile[]; zipName?: string; compare?: CompareOutput };
 
 export type ToolContext = {
   tool: Tool;

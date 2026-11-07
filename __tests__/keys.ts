@@ -28,6 +28,7 @@ export function usedKeys(): Set<string> {
       if ('sub' in f && f.sub) keys.add(f.sub);
       if ('hint' in f && f.hint) keys.add(f.hint);
       if (f.kind === 'note') keys.add(f.text);
+      if (f.kind === 'groups') f.groups.forEach((g) => [g.label, ...g.options.map((c) => c.label)].forEach((k) => /[a-z]/.test(k) && keys.add(k)));
     }
   Object.values(CATEGORY_NAMES).forEach((k) => keys.add(k));
   return keys;

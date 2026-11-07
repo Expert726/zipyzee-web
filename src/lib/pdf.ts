@@ -13,8 +13,9 @@ export async function loadPdf(file: File): Promise<PDFDocument> {
   }
 }
 
-export async function savePdf(doc: PDFDocument, name: string): Promise<OutputFile> {
-  const bytes = await doc.save();
+/** `updateFieldAppearances: false` keeps form fields as filled (PDF forms draws them itself, or leaves Urdu to the viewer). */
+export async function savePdf(doc: PDFDocument, name: string, opts?: { updateFieldAppearances?: boolean }): Promise<OutputFile> {
+  const bytes = await doc.save({ updateFieldAppearances: opts?.updateFieldAppearances });
   return { name, blob: new Blob([bytes as BlobPart], { type: 'application/pdf' }) };
 }
 

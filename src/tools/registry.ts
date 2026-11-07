@@ -11,12 +11,15 @@ import {
 import type { CategoryId, Tool } from './types';
 import { WEB_TOOLS } from './handlers/ids';
 
-/** Like the app's SERVER_TOOLS_LIVE = false: server tools are "coming soon" (not counted) until the server is live. */
+/**
+ * Like the app's SERVER_TOOLS_LIVE = false: server tools are "coming soon" (not counted) until the server is live,
+ * except the ones the website now does in the browser (in WEB_TOOLS, e.g. Repair PDF).
+ */
 const SERVER_TOOLS_LIVE = false;
 
 const tool = (x: Omit<Tool, 'web'>): Tool => ({
   ...x,
-  comingSoon: x.comingSoon || (x.engine === 'server' && !SERVER_TOOLS_LIVE),
+  comingSoon: x.comingSoon || (x.engine !== 'device' && !SERVER_TOOLS_LIVE && !WEB_TOOLS.has(x.id) && x.category !== 'ai'),
   web: WEB_TOOLS.has(x.id),
 });
 

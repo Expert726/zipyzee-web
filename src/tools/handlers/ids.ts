@@ -1,11 +1,50 @@
-/** Tools that work on the web site now: each has a handler in ./index.ts. Kept apart so the registry stays light. */
+/** Tools that work on the web site now: a handler in ./index.ts, or a custom screen (CUSTOM_TOOLS). Kept apart so the
+ *  registry stays light. */
 export const WEB_TOOLS = new Set([
   'merge-pdf',
   'split-pdf',
+  'compress-pdf',
+  'pdf-to-image',
+  'organize-pdf',
+  'remove-watermark',
+  'crop-pdf',
+  'annotate-pdf',
+  'sign-pdf',
+  'pdf-forms',
+  'protect-pdf',
+  'unlock-pdf',
+  'compare-pdf',
+  'extract-images',
+  'redact-pdf',
+  'grayscale-pdf',
+  'remove-bg',
+  'change-bg',
+  'repair-pdf',
+  'crop-image',
+  'passport-photo',
+  'upscale-image',
+  'blur-image',
+  'draw-image',
+  'collage',
+  'batch-edit',
+  'sticker-maker',
+  'signature-maker',
+  'object-eraser',
   'rotate-pdf',
   'page-numbers',
   'images-to-pdf',
   'compress-image',
   'resize-image',
   'convert-image',
+  'pdf-watermark',
+  'image-watermark',
+  'strip-metadata',
+  // custom screens, no handler (src/components/custom/)
+  'calculator',
+  'age-calculator',
+  'text-editor',
+  'make-doc',
 ]);
+
+/** Tools with their own screen (src/components/custom), no file flow. */
+export const CUSTOM_IDS = new Set(['calculator', 'age-calculator', 'text-editor', 'make-doc']);

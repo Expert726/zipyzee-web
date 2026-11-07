@@ -5,6 +5,7 @@ import { I18nProvider } from '@/i18n/client';
 import { isLanguage, isRTLLanguage, LANGUAGES, tr } from '@/i18n';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { NavHistory } from '@/components/nav/history';
 import { SITE_NAME, SITE_URL } from '@/config';
 import { TOOL_COUNT } from '@/tools/registry';
 import '../globals.css';
@@ -41,9 +42,10 @@ export default async function RootLayout({ children, params }: LayoutProps<'/[la
       </head>
       <body className="lime-glow min-h-dvh flex flex-col">
         <I18nProvider lang={lang}>
+          <NavHistory />
           <SiteHeader />
-          <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6">{children}</main>
-          <SiteFooter />
+          <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6">{children}</main>
+          <SiteFooter lang={lang} />
         </I18nProvider>
       </body>
     </html>

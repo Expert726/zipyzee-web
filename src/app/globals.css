@@ -39,6 +39,8 @@
   --shadow-soft: 0px 6px 20px rgba(95, 140, 40, 0.12);
   --shadow-raised: 0px 6px 16px rgba(18, 18, 18, 0.18);
   --card-border: transparent;
+  --category: #5fa336;
+  --category-tint: #5fa3361f;
   color-scheme: light;
 }
 
@@ -70,6 +72,8 @@
     --shadow-soft: 0px 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-raised: 0px 6px 16px rgba(0, 0, 0, 0.54);
     --card-border: #2e3029;
+    --category: #7cc24e;
+    --category-tint: #7cc24e33;
     color-scheme: dark;
   }
 }
@@ -101,6 +105,8 @@
   --shadow-soft: 0px 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-raised: 0px 6px 16px rgba(0, 0, 0, 0.54);
   --card-border: #2e3029;
+  --category: #7cc24e;
+  --category-tint: #7cc24e33;
   color-scheme: dark;
 }
 
@@ -129,6 +135,8 @@
   --color-on-ink: var(--on-ink);
   --color-ink-muted: var(--ink-muted);
   --color-brand: var(--brand-green);
+  --color-category: var(--category);
+  --color-category-tint: var(--category-tint);
   --color-overlay: var(--overlay);
   --color-paper: var(--paper);
   --color-paper-ink: var(--paper-ink);
@@ -162,6 +170,11 @@ html[lang="ur"] body {
   background: linear-gradient(180deg, var(--glow-from) 0%, var(--background) 520px);
 }
 
+/* The footer: the same glow rising from the bottom, so it melts into the page instead of a block of its own */
+.lime-glow-bottom {
+  background: linear-gradient(180deg, transparent 0%, var(--glow-from) 100%);
+}
+
 /* Primary pill: the lime gradient (the app's LimeFill) */
 .lime-fill {
   background: linear-gradient(90deg, var(--lime-from), var(--lime-to));
@@ -187,5 +200,141 @@ html[lang="ur"] body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* The Text editor's editing area (Tailwind resets headings and lists, so the document look is set here) */
+.rich-editor {
+  line-height: 1.6;
+  word-break: break-word;
+}
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-secondary);
+}
+.rich-editor :is(p, div, li, h1, h2, blockquote) {
+  unicode-bidi: plaintext;
+}
+.rich-editor p,
+.rich-editor > div {
+  margin: 0 0 0.4em;
+}
+.rich-editor h1 {
+  font-size: 1.6em;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0.6em 0 0.25em;
+}
+.rich-editor h2 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin: 0.6em 0 0.25em;
+}
+.rich-editor ul {
+  list-style: disc;
+  padding-inline-start: 1.5em;
+  margin: 0 0 0.5em;
+}
+.rich-editor ol {
+  list-style: decimal;
+  padding-inline-start: 1.5em;
+  margin: 0 0 0.5em;
+}
+.rich-editor ul.x-todo {
+  list-style: none;
+  padding-inline-start: 0.2em;
+}
+.rich-editor ul.x-todo input {
+  margin-inline-end: 0.4em;
+  transform: scale(1.15);
+  accent-color: var(--primary);
+  vertical-align: middle;
+}
+.rich-editor a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+.rich-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.rich-editor blockquote {
+  border-inline-start: 3px solid var(--border-strong);
+  padding-inline-start: 0.75em;
+  color: var(--text-muted);
+}
+.rich-editor hr {
+  border: 0;
+  border-top: 1px solid var(--border-strong);
+  margin: 0.8em 0;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The processing screen (components/flow/Processing.tsx), like the app's ProcessingStep */
+@keyframes ripple {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+@keyframes shine {
+  from {
+    left: -3rem;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+/* Background remover while it finds the subject (components/flow/custom/BgEditor.tsx): sparkles over the dimmed photo
+   and a soft light sweeping down, like remove.bg. Reduce motion stops them (the rule above). */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  70% {
+    opacity: 0.6;
+    transform: scale(0.7) rotate(70deg);
+  }
+}
+@keyframes sweep {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100%);
   }
 }

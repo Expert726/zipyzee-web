@@ -3,19 +3,15 @@
 // app's src/chat/firebase.ts. No API key of ours is in the site: the Firebase web config is public by design, and
 // App Check (reCAPTCHA Enterprise) proves requests come from this site. Settings: .env.local (see .env.example).
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
+import { getToken, initializeAppCheck, ReCaptchaEnterpriseProvider, type AppCheck } from 'firebase/app-check';
 import { getAI, getGenerativeModel, GoogleAIBackend, Schema, type ObjectSchema } from 'firebase/ai';
 import { t } from '@/i18n';
+import { FIREBASE_CONFIG } from '@/config';
 
 /** The same model as the app (src/config.ts ZEE_MODEL): fast, no long thinking. */
 export const ZEE_MODEL = process.env.NEXT_PUBLIC_ZEE_MODEL || 'gemini-3.1-flash-lite';
 
-const config = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+const config = FIREBASE_CONFIG;
 const RECAPTCHA_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 /** Zee works on this site (the Firebase web app is set up in .env.local). */
@@ -25,7 +21,9 @@ export const zeeReady = () => !!(config.apiKey && config.projectId && config.app
 export class ZeeError extends Error {}
 
 let app: FirebaseApp | null = null;
-function firebase(): FirebaseApp {
+let appCheck: AppCheck | null = null;
+/** The site's Firebase app (Zee and chat), App Check started once. */
+export function firebase(): FirebaseApp {
   if (app) return app;
   if (!zeeReady()) throw new ZeeError(t('Zee isn\'t set up on this website yet. Try the ZipyZee Android app.'));
   app = getApps().length ? getApp() : initializeApp(config);
@@ -34,9 +32,20 @@ function firebase(): FirebaseApp {
     (self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean | string }).FIREBASE_APPCHECK_DEBUG_TOKEN = process.env.NEXT_PUBLIC_APPCHECK_DEBUG_TOKEN || true;
   }
   if (RECAPTCHA_KEY || process.env.NODE_ENV !== 'production') {
-    initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_KEY || 'debug'), isTokenAutoRefreshEnabled: true });
+    appCheck = initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_KEY || 'debug'), isTokenAutoRefreshEnabled: true });
   }
   return app;
+}
+
+/** This site's App Check token for a direct REST call (null when App Check isn't running or has no token). */
+export async function appCheckToken(): Promise<string | null> {
+  firebase();
+  if (!appCheck) return null;
+  try {
+    return (await getToken(appCheck, false)).token || null;
+  } catch {
+    return null;
+  }
 }
 
 /** Firebase errors as something a person can act on. */

@@ -244,6 +244,84 @@ export const TOOL_OPTIONS: Record<string, ToolOptions> = {
     ],
   },
 
+  // Image to Excel (the app's options) and the languages to read (web: Tesseract)
+  'image-to-excel': {
+    fields: [
+      { kind: 'chips', key: 'languages', label: 'Languages in the file', multi: true, default: ['eng'], options: [{ label: 'English', value: 'eng' }, { label: 'Urdu', value: 'urd' }, { label: 'Arabic', value: 'ara' }] },
+      { kind: 'segmented', key: 'sheets', label: 'Put tables in', default: 'each', options: [{ label: 'One sheet each', value: 'each' }, { label: 'All in one sheet', value: 'one' }] },
+      { kind: 'note', text: 'Read in your browser. The first time, the text reader downloads once for each language.' },
+    ],
+    validate: (v) => ((v.languages as string[] | undefined)?.length ? null : t('Choose at least one language')),
+  },
+  // Searchable PDF (a server tool in the app): an invisible text layer over every page, the look unchanged
+  'searchable-pdf': {
+    fields: [
+      { kind: 'chips', key: 'languages', label: 'Languages in the file', multi: true, default: ['eng'], options: [{ label: 'English', value: 'eng' }, { label: 'Urdu', value: 'urd' }, { label: 'Arabic', value: 'ara' }] },
+      { kind: 'note', text: 'Text is added invisibly behind the pages, so they look exactly the same. Read in your browser; big files take a while.' },
+    ],
+    validate: (v) => ((v.languages as string[] | undefined)?.length ? null : t('Choose at least one language')),
+  },
+
+  // the spreadsheet tools (the app's options)
+  'excel-to-pdf': {
+    fields: [
+      { kind: 'segmented', key: 'fit', label: 'Fit', default: 'actual', options: [{ label: 'Actual size', value: 'actual' }, { label: 'Fit width', value: 'width' }, { label: 'One page per sheet', value: 'page' }] },
+      { kind: 'segmented', key: 'orientation', label: 'Orientation', default: 'portrait', options: [{ label: 'Portrait', value: 'portrait' }, { label: 'Landscape', value: 'landscape' }] },
+    ],
+  },
+  'convert-sheet': {
+    fields: [
+      { kind: 'segmented', key: 'format', label: 'Save as', default: 'xlsx', options: [{ label: 'Excel (.xlsx)', value: 'xlsx' }, { label: 'CSV', value: 'csv' }] },
+      { kind: 'toggle', key: 'split', label: 'One file per sheet', sub: 'Each sheet saved as its own file', default: false },
+      { kind: 'note', text: 'CSV keeps only the values: one file per sheet, without formatting or formulas.' },
+    ],
+    visible: (key, v) => (key === 'split' ? v.format !== 'csv' : true),
+  },
+  'merge-excel': {
+    fields: [
+      { kind: 'segmented', key: 'mode', label: 'Put in', default: 'sheets', options: [{ label: 'One sheet per file', value: 'sheets' }, { label: 'All rows in one sheet', value: 'rows' }] },
+      { kind: 'toggle', key: 'dropHeaders', label: 'Keep only the first header row', sub: 'Skip the first row of every other file', default: true },
+    ],
+    visible: (key, v) => (key === 'dropHeaders' ? v.mode === 'rows' : true),
+  },
+  'pdf-to-excel': {
+    fields: [
+      { kind: 'segmented', key: 'sheets', label: 'Put tables in', default: 'each', options: [{ label: 'One sheet each', value: 'each' }, { label: 'All in one sheet', value: 'one' }] },
+      { kind: 'note', text: 'Works best on clear printed tables. Scanned pages are read in your browser, which takes longer.' },
+    ],
+  },
+
+  'pdf-to-text': {
+    fields: [
+      { kind: 'segmented', key: 'format', label: 'Save as', default: 'markdown', options: [{ label: 'Plain text', value: 'text' }, { label: 'Markdown', value: 'markdown' }] },
+      { kind: 'toggle', key: 'structure', label: 'Keep headings and lists', default: true },
+    ],
+    visible: (key, v) => (key === 'structure' ? v.format === 'markdown' : true),
+  },
+
+  // Make a ZIP (the app's options)
+  'make-zip': {
+    fields: [
+      { kind: 'text', key: 'name', label: 'ZIP name', default: '', placeholder: 'files', hint: '.zip is added for you' },
+      { kind: 'segmented', key: 'level', label: 'Compression', default: 'normal', options: [{ label: 'Normal', value: 'normal' }, { label: 'Maximum', value: 'max' }, { label: 'Fast', value: 'fast' }] },
+      { kind: 'toggle', key: 'protect', label: 'Password protect', sub: 'AES-256: nobody opens it without the password', default: false },
+      { kind: 'text', key: 'password', label: 'Password', default: '', secure: true },
+      { kind: 'text', key: 'confirm', label: 'Type it again', default: '', secure: true },
+    ],
+    visible: (key, v) => (key === 'password' || key === 'confirm' ? !!v.protect : true),
+    validate: (v) => (!v.protect ? null : !String(v.password ?? '') ? t('Enter a password') : v.password !== v.confirm ? t('The passwords don\'t match') : null),
+  },
+
+  // PDF to Word in the browser: editable text (default) or the exact look (pages as pictures)
+  'pdf-to-word': {
+    fields: [
+      { kind: 'segmented', key: 'mode', label: 'Result', default: 'text', options: [{ label: 'Editable text', value: 'text' }, { label: 'Keep layout', value: 'layout' }] },
+      { kind: 'toggle', key: 'ocr', label: 'Read scanned pages (OCR)', sub: 'Slower, needed for photos of pages', default: false },
+      { kind: 'note', text: 'Editable text keeps headings, lists and paragraphs; Keep layout puts each page in as a picture, exactly as it looks.' },
+    ],
+    visible: (key, v) => (key === 'ocr' ? v.mode === 'text' : true),
+  },
+
   'compress-image': {
     fields: [
       { kind: 'segmented', key: 'target', label: 'Target size', default: 'any', options: [{ label: 'Any', value: 'any' }, ...TARGET_KB.map((kb) => ({ label: `${kb} KB`, value: String(kb) }))] },
@@ -326,4 +404,9 @@ export const ACCEPT: Record<string, string> = {
   // what browsers can open (HEIC: Safari)
   image: 'image/jpeg,image/png,image/webp,image/avif,image/gif,image/bmp,image/x-icon,image/heic,image/heif,.ico',
   images: 'image/jpeg,image/png,image/webp,image/avif,image/gif,image/bmp,image/x-icon,image/heic,image/heif,.ico',
+  sheet: '.xlsx,.xlsm,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/vnd.oasis.opendocument.spreadsheet,text/csv',
+  sheets: '.xlsx,.xlsm,.xls,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/vnd.oasis.opendocument.spreadsheet,text/csv',
+  archive: '.zip,.rar,.7z,application/zip,application/x-rar-compressed,application/vnd.rar,application/x-7z-compressed',
+  office: '.doc,.docx,.ppt,.pptx,.odt,.odp,.rtf',
+  files: '',
 };

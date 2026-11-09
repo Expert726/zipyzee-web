@@ -10,31 +10,45 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "predev": "node scripts/copy-pdfjs.mjs",
-    "prebuild": "node scripts/copy-pdfjs.mjs"
+    "prebuild": "node scripts/copy-pdfjs.mjs",
+    "thumbs": "tsx scripts/resume-thumbs.ts"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "^2.11.1",
     "@huggingface/transformers": "^4.3.2",
     "@jsquash/avif": "2.1.1",
     "@mediapipe/tasks-vision": "^0.10.21",
+    "@zip.js/zip.js": "2.24.0",
+    "barcode-detector": "3.2.3",
+    "docx": "9.13.0",
     "firebase": "^13.2.0",
     "gifenc": "1.0.3",
+    "libarchive.js": "2.0.2",
     "lucide-react": "^1.70.0",
     "next": "16.4.5",
     "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.6.205",
+    "piexifjs": "1.0.6",
+    "pptxgenjs": "4.0.1",
+    "qrcode": "1.5.4",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "tesseract.js": "7.0.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/piexifjs": "1.0.0",
+    "@types/qrcode": "1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
+    "puppeteer-core": "24.43.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

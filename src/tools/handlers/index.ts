@@ -26,6 +26,14 @@ import { batchEdit } from './batchEdit';
 import { stickerMaker } from './stickerMaker';
 import { signatureMaker } from './signatureMaker';
 import { objectEraser } from './objectEraser';
+import { smartScan } from './smartScan';
+import { idScan } from './idScan';
+import { qrCreate } from './qrCreate';
+import { businessCard, imageToExcel, ocrText, searchablePdf } from './ocrTools';
+import { convertSheet, excelToImage, excelToPdf, mergeExcel, pdfToExcel } from './sheetTools';
+import { pdfToText } from './pdfToText';
+import { extractArchive, makeZip } from './archiveTools';
+import { pdfToPpt, pdfToWord } from './officeTools';
 import { imagesToPdf } from './imagesToPdf';
 import { mergePdf } from './mergePdf';
 import { pageNumbers } from './pageNumbers';
@@ -64,6 +72,24 @@ export const HANDLERS: Record<string, ToolHandler> = {
   'sticker-maker': stickerMaker,
   'signature-maker': signatureMaker,
   'object-eraser': objectEraser,
+  'smart-scan': smartScan,
+  'id-scan': idScan,
+  'qr-scanner': qrCreate,
+  ocr: ocrText,
+  'urdu-ocr': ocrText,
+  'business-card': businessCard,
+  'image-to-excel': imageToExcel,
+  'searchable-pdf': searchablePdf,
+  'excel-to-pdf': excelToPdf,
+  'excel-to-image': excelToImage,
+  'convert-sheet': convertSheet,
+  'merge-excel': mergeExcel,
+  'pdf-to-excel': pdfToExcel,
+  'pdf-to-text': pdfToText,
+  'extract-archive': extractArchive,
+  'make-zip': makeZip,
+  'pdf-to-word': pdfToWord,
+  'pdf-to-ppt': pdfToPpt,
   'rotate-pdf': rotatePdf,
   'page-numbers': pageNumbers,
   'images-to-pdf': imagesToPdf,

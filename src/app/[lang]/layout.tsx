@@ -6,6 +6,7 @@ import { isLanguage, isRTLLanguage, LANGUAGES, tr } from '@/i18n';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { NavHistory } from '@/components/nav/history';
+import { Prefetch } from '@/components/Prefetch';
 import { SITE_NAME, SITE_URL } from '@/config';
 import { TOOL_COUNT } from '@/tools/registry';
 import '../globals.css';
@@ -43,6 +44,7 @@ export default async function RootLayout({ children, params }: LayoutProps<'/[la
       <body className="lime-glow min-h-dvh flex flex-col">
         <I18nProvider lang={lang}>
           <NavHistory />
+          <Prefetch />
           <SiteHeader />
           <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6">{children}</main>
           <SiteFooter lang={lang} />

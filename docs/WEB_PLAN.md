@@ -151,3 +151,48 @@ Formats, presets, crop, passport (2026-11-07, on request "allow all possible"):
   (the face only sets the start; never blocks), Remove background on/off + 6 backgrounds, paper 6×4 / 7×5 / A4 /
   Letter / A5 and 1-16 copies or a full sheet, live sheet preview; files: 300 dpi photo, sheet JPG, sheet PDF.
   Not tested: AVIF under Turbopack, TIFF / ICO / BMP opening in other apps, country sizes against current rules.
+
+2026-11-09 (on request):
+- Background downloads (src/lib/prefetch.ts, <Prefetch/> in the layout): a few seconds after any page loads, when
+  idle, one file at a time at low priority: MediaPipe face model, ormbg, Swin2SR 2x / 4x into "transformers-cache"
+  (same keys transformers.js uses: https://huggingface.co/<model>/resolve/main/<file>), ORT wasm + LaMa only on
+  non-metered connections with room. Skipped with Data Saver or 2G / 3G. A tool opened mid-download fetches its own copy.
+- Remove metadata shows everything (src/tools/image/metadataWeb.ts with piexifjs, MIT): groups Location (map link),
+  Camera and settings, Date, Owner, Software, Descriptions, Hidden preview, XMP / IPTC; Remove or Keep each; per-photo
+  values; × removes a photo. Tested: __tests__/metadataWeb.test.ts.
+- Collage maker: each photo framed by hand (drag to move in its cell, wheel / slider to zoom, Reset;
+  src/tools/image/collageFit.ts used by the preview and the handler); swap by the move handle.
+- Smart scan / ID card scan (2026-11-09): own corner finding (Otsu + biggest region, src/lib/docScan.ts), drag the
+  corners (QuadEditor with a magnifier), homography straighten (src/tools/scanQuad.ts, tested), the app's filters;
+  PDF / images; ID: front + back, Real size / Larger / Fill page, A4 / Letter, watermark. Tested in Chrome on a
+  synthetic tilted page: corners within ~1%.
+- QR and barcode (2026-11-09): Scan (camera, switch camera, torch, photo, pasted screenshot; native BarcodeDetector or
+  barcode-detector + ZXing wasm from /zxing) with the app's result actions; Create (the app's kinds, Links + Paste
+  all, colour / gradient / background / logo, contrast and length checks, design kept) saved as PNG 1024 + SVG.
+  Tested in Chrome: create a link code, scan it back, with and without the native reader.
+- Text reading (2026-11-09): Tesseract.js (Apache-2.0; worker + core from /tesseract, language data from its CDN once):
+  Image to text + Urdu OCR (OcrEditor: languages, area, editable text, Copy, .txt), Business card (CardEditor ->
+  parseCard -> .vcf), Image to Excel (words -> sheets/table.ts -> xlsx), Searchable PDF (Tesseract's text-only PDF page
+  laid over each original page; rotated pages untested). Tested: Image to text read a test photo exactly.
+- Spreadsheets: SheetJS 0.20.3 (as the app), src/tools/sheets/book.ts ported; Excel to PDF / JPG drawn on canvas
+  (src/lib/sheetRender.ts: widths, merges, RTL), Excel and CSV, Merge Excel, PDF to Excel (pdf.js words; scans via OCR).
+- PDF to text (pdf.js lines -> headings / lists / paragraphs, .md or .txt), PDF to Word (docx 9.13: editable text or
+  pages as pictures, optional OCR), PDF to PowerPoint (pptxgenjs: a slide per page), Make a ZIP (@zip.js: AES-256),
+  Extract ZIP / RAR (zip.js + libarchive.js from /libarchive; ArchiveEditor). __tests__/archive.test.ts round-trips.
+  All nine standard-flow ones run end to end in Chrome (puppeteer) to their result screen.
+- Need the conversion server, not the browser: Web page to PDF (cross-origin pages can't be fetched), Word to PDF and
+  PowerPoint to PDF (a real office engine, LibreOffice, for faithful layout and old .doc / .ppt).
+
+Chats on the web, stage 1 (2026-11-09): the app's Firebase project (zipyzee-e92f1) web app, config in src/config.ts
+FIREBASE_CONFIG (public by design; .env.local can override). src/chat/firebase.ts = the app's chat functions on the
+web SDK (same collections, fields and batches, so firestore.rules accept both); format.ts / types.ts copied. /[lang]/chats:
+Google sign-in only (popup, redirect if blocked), Create account (username, I am a), chat list (ZipyZee Team pinned,
+unread, previews), New chat by @username, thread (text, links, files as base64 pieces with photo previews and
+download, voice playback + markHeard, Seen ticks, Edit 5 min, Delete for everyone, deleteExpired, shortenSeen,
+markRead, presence every minute while visible). Header link "Chats".
+Setup: Firebase console -> Authentication -> Settings -> Authorized domains: add the site's domain (localhost is in).
+App Check: dev exchanges a debug token (403 until it's added under App Check -> Manage debug tokens); production needs
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY. Only matters for Firestore if its App Check enforcement is on (Zee always needs it).
+Analytics from the console snippet isn't turned on (needs a cookie notice and the privacy policy updated).
+Stage 2: recording voice notes, groups (create, leave, names), invite links / QR, block and report, view-once, chat
+options (clear / delete chat), forwarding. Stage 3: web push (FCM), Settings (name, who can message me, delete account).

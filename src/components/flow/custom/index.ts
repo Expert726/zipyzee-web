@@ -15,6 +15,13 @@ import { DrawEditor } from './DrawEditor';
 import { CollageEditor } from './CollageEditor';
 import { SignatureMakerEditor } from './SignatureMakerEditor';
 import { EraserEditor } from './EraserEditor';
+import { MetadataEditor } from './MetadataEditor';
+import { ScanEditor } from './scan/ScanEditor';
+import { IdScanEditor } from './scan/IdScanEditor';
+import { QrEditor } from './qr/QrEditor';
+import { OcrEditor } from './ocr/OcrEditor';
+import { CardEditor } from './ocr/CardEditor';
+import { ArchiveEditor } from './ArchiveEditor';
 
 /** onReplace opens the file picker (it adds to the list on a many-files tool); onFiles changes the list (Collage). */
 export type CustomSetupProps = { tool: Tool; files: File[]; onStart: (values: OptionValues) => void; onReplace: () => void; onFiles?: (files: File[]) => void };
@@ -35,6 +42,14 @@ export const CUSTOM_SETUPS: Record<string, (p: CustomSetupProps) => React.ReactE
   collage: CollageEditor,
   'signature-maker': SignatureMakerEditor,
   'object-eraser': EraserEditor,
+  'strip-metadata': MetadataEditor,
+  'smart-scan': ScanEditor,
+  'id-scan': IdScanEditor,
+  'qr-scanner': QrEditor,
+  ocr: OcrEditor,
+  'urdu-ocr': OcrEditor,
+  'business-card': CardEditor,
+  'extract-archive': ArchiveEditor,
 };
 
 /** Tools whose step 4 is their own screen (the app's CUSTOM_RESULTS). */

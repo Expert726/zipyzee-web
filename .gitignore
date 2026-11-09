@@ -45,3 +45,6 @@ next-env.d.ts
 /public/pdfjs
 /public/mediapipe
 /public/ort
+/public/zxing
+/public/tesseract
+/public/libarchive

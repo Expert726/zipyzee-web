@@ -216,7 +216,6 @@ export function ToolFlow({ toolId }: { toolId: string }) {
   );
 
   if (step.kind === 'pick') {
-    const pdf = isPdf(tool.input);
     return (
       <div className="flex flex-col items-center text-center gap-3 py-4">
         {fileInput}
@@ -226,7 +225,7 @@ export function ToolFlow({ toolId }: { toolId: string }) {
           className="lime-fill rounded-[20px] min-h-16 sm:min-h-[72px] px-10 sm:px-14 text-[18px] sm:text-[20px] font-semibold shadow-soft hover:brightness-95 inline-flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <Upload size={22} aria-hidden="true" />
-          {multi ? (pdf ? t('Choose PDFs') : t('Choose photos')) : pdf ? t('Choose a PDF') : t('Choose a photo')}
+          {chooseLabel(t, tool.input)}
         </button>
         <p className="text-[13px] text-secondary">{t('or drop them here')}</p>
         {RECENT_GROUPS[toolId] && (
@@ -357,9 +356,38 @@ export function ToolFlow({ toolId }: { toolId: string }) {
 
 const isPdf = (input: string) => input === 'pdf' || input === 'pdfs';
 
+/** Whether a picked or dropped file is the kind the tool takes. */
 function matches(f: File, input: string) {
   if (isPdf(input)) return f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+  if (input === 'sheet' || input === 'sheets') return /\.(xlsx|xlsm|xls|ods|csv)$/i.test(f.name) || /spreadsheet|ms-excel|csv/.test(f.type);
+  if (input === 'archive') return /\.(zip|rar|7z)$/i.test(f.name) || /zip|rar|7z/.test(f.type);
+  if (input === 'office') return /\.(docx?|pptx?|odt|odp|rtf)$/i.test(f.name);
+  if (input === 'files') return true;
   return f.type.startsWith('image/') || /\.(jpe?g|png|webp|avif|gif|bmp|ico|heic|heif)$/i.test(f.name);
+}
+
+/** The pick button's words for the kind of file. */
+function chooseLabel(t: (k: string) => string, input: string) {
+  switch (input) {
+    case 'pdf':
+      return t('Choose a PDF');
+    case 'pdfs':
+      return t('Choose PDFs');
+    case 'images':
+      return t('Choose photos');
+    case 'sheet':
+      return t('Choose a spreadsheet');
+    case 'sheets':
+      return t('Choose spreadsheets');
+    case 'archive':
+      return t('Choose a ZIP, RAR or 7z file');
+    case 'files':
+      return t('Choose files');
+    case 'office':
+      return t('Choose a file');
+    default:
+      return t('Choose a photo');
+  }
 }
 
 function IconBtn({ label, children, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {

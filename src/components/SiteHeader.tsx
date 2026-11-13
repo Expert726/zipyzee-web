@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import { ChevronDown, FileUser, Languages, Menu, MessageCircle, Moon, Sun, X } from 'lucide-react';
+import { ArrowLeftRight, ChevronDown, FileUser, Languages, Menu, MessageCircle, Moon, Sun, X } from 'lucide-react';
 import { useLanguage, useT } from '@/i18n/client';
 import type { Translate } from '@/i18n';
 import { getTool, HOME_CATEGORIES, toolsIn } from '@/tools/registry';
@@ -75,14 +75,19 @@ export function SiteHeader() {
         </nav>
 
         <div className="ms-auto flex items-center gap-1">
-          <Link href={`/${lang}/resume`} className={`h-10 px-3 rounded-full hover:bg-fill inline-flex items-center gap-1.5 text-[14px] font-semibold ${path.startsWith(`/${lang}/resume`) ? 'text-primary' : ''}`}>
+          {/* text, photos and files between two devices */}
+          <Link href={`/${lang}/zeeshare`} title={t('ZeeShare')} className={`h-10 px-3 rounded-full hover:bg-fill inline-flex items-center gap-1.5 text-[14px] font-semibold ${path.startsWith(`/${lang}/zeeshare`) ? 'text-primary' : ''}`}>
+            <ArrowLeftRight size={18} aria-hidden="true" />
+            <span className="hidden xl:inline">{t('ZeeShare')}</span>
+          </Link>
+          <Link href={`/${lang}/resume`} title={t('Resume')} className={`h-10 px-3 rounded-full hover:bg-fill inline-flex items-center gap-1.5 text-[14px] font-semibold ${path.startsWith(`/${lang}/resume`) ? 'text-primary' : ''}`}>
             <FileUser size={18} aria-hidden="true" />
-            <span className="hidden sm:inline">{t('Resume')}</span>
+            <span className="hidden xl:inline">{t('Resume')}</span>
           </Link>
           {/* the same chats as the app (Google sign-in) */}
-          <Link href={`/${lang}/chats`} className={`h-10 px-3 rounded-full hover:bg-fill inline-flex items-center gap-1.5 text-[14px] font-semibold ${path.startsWith(`/${lang}/chats`) ? 'text-primary' : ''}`}>
+          <Link href={`/${lang}/chats`} title={t('Chats')} className={`h-10 px-3 rounded-full hover:bg-fill inline-flex items-center gap-1.5 text-[14px] font-semibold ${path.startsWith(`/${lang}/chats`) ? 'text-primary' : ''}`}>
             <MessageCircle size={18} aria-hidden="true" />
-            <span className="hidden sm:inline">{t('Chats')}</span>
+            <span className="hidden xl:inline">{t('Chats')}</span>
           </Link>
           <Link
             href={otherPath}

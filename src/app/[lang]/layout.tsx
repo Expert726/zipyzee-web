@@ -1,3 +1,4 @@
+import { ThemeKeeper } from '@/components/ThemeKeeper';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Noto_Naskh_Arabic, Poppins } from 'next/font/google';
@@ -42,6 +43,7 @@ export default async function RootLayout({ children, params }: LayoutProps<'/[la
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="lime-glow min-h-dvh flex flex-col">
+        <ThemeKeeper />
         <I18nProvider lang={lang}>
           <NavHistory />
           <Prefetch />

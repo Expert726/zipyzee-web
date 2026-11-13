@@ -56,6 +56,11 @@ export function SiteFooter({ lang }: { lang: Language }) {
               </Link>
             </li>
             <li>
+              <Link href={`/${lang}/contact`} className="text-text hover:text-primary hover:underline underline-offset-4">
+                {t('Contact us')}
+              </Link>
+            </li>
+            <li>
               <a href={PLAY_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
                 {t('Get the Android app')}
               </a>
@@ -64,7 +69,18 @@ export function SiteFooter({ lang }: { lang: Language }) {
         </nav>
       </div>
       <div className="border-t border-line/50">
-        <p className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 text-[13px] text-text">© ZipyZee</p>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-text">
+          <p className="me-auto">© ZipyZee</p>
+          <Link href={`/${lang}/privacy`} className="hover:text-primary hover:underline underline-offset-4">
+            {t('Privacy policy')}
+          </Link>
+          <Link href={`/${lang}/contact`} className="hover:text-primary hover:underline underline-offset-4">
+            {t('Contact us')}
+          </Link>
+          <Link href={`/${lang}/account/delete`} className="hover:text-primary hover:underline underline-offset-4">
+            {t('Delete account')}
+          </Link>
+        </div>
       </div>
     </footer>
   );

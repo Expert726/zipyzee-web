@@ -5,7 +5,17 @@ export type Role = 'student' | 'professional' | 'other' | 'admin';
 
 /** findable: shows up in New chat's @username search (Settings, "Who can message me": Anyone). */
 /** gone: no profile any more (the account was deleted); kept so the app stops looking it up and says so. */
-export type Profile = { uid: string; name: string; username: string; role: Role; lastSeen?: number; findable?: boolean; gone?: boolean };
+export type Profile = {
+  uid: string;
+  name: string;
+  username: string;
+  role: Role;
+  lastSeen?: number;
+  findable?: boolean;
+  gone?: boolean;
+  /** Delete account: deleted for good at this time unless the person signs in again first */
+  deleteAt?: number;
+};
 
 /** chunks: the file is stored in Firestore as this many pieces (chats/{chatId}/files/{msgId}/chunks/{0..}). */
 export type ChatFile = { path: string; name: string; size: number; mimeType: string; pages?: number; chunks?: number };

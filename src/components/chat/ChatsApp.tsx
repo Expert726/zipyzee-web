@@ -4,10 +4,11 @@
 // chat by @username. The open chat is in the address (?c=<chatId>) so Back and refresh keep it. Same Firestore data
 // and rules as the app, so the phone and the web show the same chats.
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Check, CheckCheck, Loader2, LogOut, MessageSquarePlus, Search, Timer, X } from 'lucide-react';
-import { useT } from '@/i18n/client';
-import { ChatError, getProfile, openDirectChat, openSupportChat, searchUsers, signOut, supportUid, touchPresence, watchAuth, watchChats, watchProfile, type AuthUser } from '@/chat/firebase';
+import { Check, CheckCheck, ChevronRight, Loader2, LogOut, MessageSquarePlus, Search, Timer, UserX, X } from 'lucide-react';
+import { useLanguage, useT } from '@/i18n/client';
+import { ChatError, getProfile, restoreAccount, watchDeleteRequests, openDirectChat, openSupportChat, searchUsers, signOut, supportUid, touchPresence, watchAuth, watchChats, watchProfile, type AuthUser } from '@/chat/firebase';
 import { chatTime, cleanUsername, firstName, isSupportChat, previewText } from '@/chat/format';
 import type { Chat, Profile } from '@/chat/types';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -48,12 +49,24 @@ export function ChatsApp() {
   const [finding, setFinding] = useState(false);
   const [askSignOut, setAskSignOut] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [restored, setRestored] = useState(false);
+  const lang = useLanguage();
+  // the ZipyZee Team account: account deletion requests ready to carry out (7 days over)
+  const isAdmin = profile?.role === 'admin';
+  const [readyDeletes, setReadyDeletes] = useState(0);
+  useEffect(() => (isAdmin ? watchDeleteRequests((l) => setReadyDeletes(l.filter((r) => r.status === 'pending' && r.deleteAt <= Date.now()).length)) : undefined), [isAdmin]);
 
   useEffect(() => watchAuth(setUser), []);
   useEffect(() => {
     if (!user) return;
     return watchProfile(user.uid, setProfile);
   }, [user]);
+  // signed in again within 7 days of Delete account: the account stays
+  const pendingDelete = profile?.deleteAt;
+  useEffect(() => {
+    if (!user || !pendingDelete) return;
+    void restoreAccount(user.uid).then((ok) => ok && setRestored(true), () => {});
+  }, [user, pendingDelete]);
   useEffect(() => {
     if (!user || !profile) return;
     void supportUid().then(setSupport);
@@ -154,6 +167,22 @@ export function ChatsApp() {
           </button>
         </div>
         {finding && <NewChat me={me} onOpen={(id) => { setFinding(false); go(id); }} onClose={() => setFinding(false)} />}
+        {isAdmin && (
+          <Link href={`/${lang}/admin/deletions`} className="flex items-center gap-3 rounded-row px-3 py-2.5 bg-fill/60 hover:bg-fill">
+            <UserX size={18} aria-hidden="true" className="text-error shrink-0" />
+            <span className="flex-1 text-[14px] font-semibold">{t('Account deletion requests')}</span>
+            {readyDeletes > 0 && <span className="min-w-5 h-5 px-1.5 rounded-full bg-error text-white text-[11px] font-bold grid place-items-center">{readyDeletes}</span>}
+            <ChevronRight size={16} aria-hidden="true" className="text-secondary flip-rtl" />
+          </Link>
+        )}
+        {restored && (
+          <p className="flex items-start gap-2 rounded-xl bg-success/10 px-3 py-2 text-[13px]" role="status">
+            <span className="flex-1">{t('Welcome back! Your account won\'t be deleted.')}</span>
+            <button type="button" onClick={() => setRestored(false)} aria-label={t('Close')} className="shrink-0">
+              <X size={14} aria-hidden="true" />
+            </button>
+          </p>
+        )}
         {error && <p className="text-[13px] text-error px-2" role="alert">{error}</p>}
         {chats == null ? (
           <Loader2 size={22} className="animate-spin text-primary mx-auto my-8" aria-label={t('Loading chats')} />

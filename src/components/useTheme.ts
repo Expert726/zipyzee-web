@@ -21,6 +21,28 @@ function subscribe(fn: () => void) {
   };
 }
 
+function saved(): 'light' | 'dark' | null {
+  try {
+    const t = localStorage.getItem('theme');
+    return t === 'light' || t === 'dark' ? t : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Puts the saved theme back on <html>. Needed after switching language: the root layout lives under [lang], so
+ * English <-> Urdu remounts <html>, and React 19 clears the attributes it didn't set (data-theme among them).
+ */
+export function applySavedTheme() {
+  const t = saved();
+  const el = document.documentElement;
+  if (t && el.getAttribute('data-theme') !== t) {
+    el.setAttribute('data-theme', t);
+    listeners.forEach((fn) => fn());
+  }
+}
+
 export function useTheme() {
   const dark = useSyncExternalStore(subscribe, isDark, () => false);
   const toggle = useCallback(() => {

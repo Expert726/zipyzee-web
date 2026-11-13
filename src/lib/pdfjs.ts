@@ -15,7 +15,7 @@ export async function openPdf(file: File | { name: string; bytes: Uint8Array }):
       cMapUrl: '/pdfjs/cmaps/',
       cMapPacked: true,
       standardFontDataUrl: '/pdfjs/standard_fonts/',
-      isEvalSupported: false,
+      // (isEvalSupported is gone in pdfjs-dist 5.7: pdf.js no longer evaluates code at all)
     }).promise;
   } catch (e) {
     if ((e as { name?: string })?.name === 'PasswordException') throw new ToolError(t('{name} is password protected. Unlock it first.', { name: file.name }));

@@ -30,6 +30,9 @@ export const FIREBASE_CONFIG = {
   measurementId: 'G-CMNJLQWQGQ',
 };
 
+/** Where people write to us (the app's FEEDBACK_EMAIL): Contact us, the privacy policy, account deletion requests. */
+export const FEEDBACK_EMAIL = 'apps.zeestudio@gmail.com';
+
 /** The ZipyZee Team account (the app's SUPPORT_USERNAME; Firestore config/support can override it). */
 export const SUPPORT_USERNAME = 'zipyzee';
 /** Biggest file in a chat (the app's MAX_CHAT_FILE_MB). */

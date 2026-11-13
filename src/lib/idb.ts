@@ -1,9 +1,9 @@
 'use client';
-// The site's one IndexedDB database ("zipyzee"): Text editor documents, Make with Zee documents, recent photos and resumes. Bump VERSION and
+// The site's one IndexedDB database ("zipyzee"): Text editor documents, Make with Zee documents, recent photos, resumes and ZeeShare history. Bump VERSION and
 // add the store in `upgrade` when a new kind of data needs a home.
 const NAME = 'zipyzee';
-const VERSION = 4;
-export type StoreName = 'textdocs' | 'zeedocs' | 'recentphotos' | 'resumes';
+const VERSION = 5;
+export type StoreName = 'textdocs' | 'zeedocs' | 'recentphotos' | 'resumes' | 'zeeshare';
 
 let opening: Promise<IDBDatabase> | null = null;
 function open(): Promise<IDBDatabase> {
@@ -11,7 +11,7 @@ function open(): Promise<IDBDatabase> {
     const req = indexedDB.open(NAME, VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
-      for (const s of ['textdocs', 'zeedocs', 'recentphotos', 'resumes'] as StoreName[]) if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' });
+      for (const s of ['textdocs', 'zeedocs', 'recentphotos', 'resumes', 'zeeshare'] as StoreName[]) if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => {

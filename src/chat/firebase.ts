@@ -52,9 +52,122 @@ export async function signInGoogle(): Promise<boolean> {
 export const signOut = () => authSignOut(auth());
 export const currentUid = (): string | null => auth().currentUser?.uid ?? null;
 
+/** Delete account waits this long; signing in again before then keeps the account. */
+export const DELETE_AFTER_MS = 7 * 24 * 3600_000;
+const PRIVATE_DOCS = ['tokens', 'account', 'resumeDetails', 'blocks'];
+
+/** The documents that hold the account: profile, username, private data (only those that exist). */
+async function accountDocs(uid: string): Promise<{ name: string; username: string | null; findable: boolean; deleteAt: number; privates: string[] }> {
+  const prof = await getDoc(doc(db(), 'users', uid));
+  if (!prof.exists()) throw new ChatError(t('This account doesn\'t exist any more.'));
+  const d = prof.data();
+  const privates: string[] = [];
+  for (const name of PRIVATE_DOCS) if ((await getDoc(doc(db(), 'users', uid, 'private', name)).catch(() => null))?.exists()) privates.push(name);
+  return { name: String(d.name ?? ''), username: typeof d.username === 'string' && d.username ? d.username : null, findable: d.findable !== false, deleteAt: ms(d.deleteAt), privates };
+}
+
+/**
+ * Delete account (the web's Delete account page): nothing goes at once. The profile, username and private data get
+ * deleteAt = in 7 days, the profile is hidden from search, a request goes to the team (deleteRequests/{uid}), and the
+ * person is signed out. Signing in again before the team has deleted it keeps everything (restoreAccount); after the
+ * 7 days the team deletes it (the admin page, adminDeleteAccount). Returns the date the team may delete it.
+ */
+export async function scheduleDeletion(): Promise<number> {
+  const user = auth().currentUser;
+  if (!user) throw new ChatError(t('Sign in first.'));
+  const uid = user.uid;
+  const at = Date.now() + DELETE_AFTER_MS;
+  const deleteAt = Timestamp.fromMillis(at);
+  try {
+    const a = await accountDocs(uid);
+    await commit([
+      { path: `deleteRequests/${uid}`, data: { uid, name: a.name.slice(0, 60), username: a.username ?? '', email: user.email ?? '', deleteAt, status: 'pending' }, transforms: [serverTime('requestedAt')] },
+      { path: `users/${uid}`, data: { deleteAt, findable: false, wasFindable: a.findable }, mask: ['deleteAt', 'findable', 'wasFindable'], exists: true },
+      ...(a.username ? [{ path: `usernames/${a.username}`, data: { deleteAt }, mask: ['deleteAt'], exists: true }] : []),
+      ...a.privates.map((name) => ({ path: `users/${uid}/private/${name}`, data: { deleteAt }, mask: ['deleteAt'], exists: true })),
+    ]);
+  } catch (e) {
+    if (e instanceof ChatError) throw e;
+    throw new ChatError(t('Could not delete the account. Check your connection and try again.'));
+  }
+  await authSignOut(auth()).catch(() => {});
+  return at;
+}
+
+/** Signed in again within the 7 days: the deletion is called off and the account is back as it was. True if it was waiting. */
+export async function restoreAccount(uid: string): Promise<boolean> {
+  const a = await accountDocs(uid);
+  if (!a.deleteAt) return false;
+  const was = (await getDoc(doc(db(), 'users', uid))).data()?.wasFindable;
+  // a field in the mask but not in the data is removed; the request to the team is withdrawn
+  await commit([
+    { path: `deleteRequests/${uid}`, delete: true },
+    { path: `users/${uid}`, data: { findable: was !== false }, mask: ['deleteAt', 'findable', 'wasFindable'], exists: true },
+    ...(a.username ? [{ path: `usernames/${a.username}`, data: {}, mask: ['deleteAt'], exists: true }] : []),
+    ...a.privates.map((name) => ({ path: `users/${uid}/private/${name}`, data: {}, mask: ['deleteAt'], exists: true })),
+  ]);
+  return true;
+}
+
+// ---------- the team: account deletion requests ----------
+
+export type DeleteRequest = { uid: string; name: string; username: string; email: string; requestedAt: number; deleteAt: number; status: 'pending' | 'deleted'; doneAt?: number };
+
+/** Every deletion request (the admin page; the rules let only the team read them), oldest deadline first. */
+export function watchDeleteRequests(cb: (list: DeleteRequest[]) => void, onError?: () => void) {
+  return onSnapshot(
+    collection(db(), 'deleteRequests'),
+    (snap) =>
+      cb(
+        snap.docs
+          .map((d) => {
+            const x = d.data();
+            return { uid: d.id, name: String(x.name ?? ''), username: String(x.username ?? ''), email: String(x.email ?? ''), requestedAt: ms(x.requestedAt), deleteAt: ms(x.deleteAt), status: x.status === 'deleted' ? 'deleted' : 'pending', doneAt: ms(x.doneAt) || undefined } as DeleteRequest;
+          })
+          .sort((a, b) => a.deleteAt - b.deleteAt),
+      ),
+    () => onError?.(),
+  );
+}
+
+/**
+ * The team carries out a request once its 7 days are over: deletes the person's profile, username, private data and
+ * Zee conversations, then marks the request done (keeping only the dates). The Google sign-in itself can only be
+ * removed in the Firebase console (Authentication) or by a server; the admin page says so.
+ */
+export async function adminDeleteAccount(req: DeleteRequest): Promise<void> {
+  if (req.deleteAt > Date.now()) throw new ChatError(t('This account can be deleted from {date}.', { date: new Date(req.deleteAt).toLocaleDateString() }));
+  const uid = req.uid;
+  // signed in again in the meantime? Then the request was withdrawn and there's nothing to do
+  const prof = await getDoc(doc(db(), 'users', uid)).catch(() => null);
+  if (prof?.exists() && !prof.data().deleteAt) throw new ChatError(t('This person signed in again, so the account stays.'));
+  try {
+    const writes: Parameters<typeof commit>[0] = [];
+    const zee = await getDocs(collection(db(), 'users', uid, 'zee')).catch(() => null);
+    for (const conv of zee?.docs ?? []) {
+      const msgs = await getDocs(collection(db(), 'users', uid, 'zee', conv.id, 'messages')).catch(() => null);
+      for (const m of msgs?.docs ?? []) writes.push({ path: `users/${uid}/zee/${conv.id}/messages/${m.id}`, delete: true });
+      writes.push({ path: `users/${uid}/zee/${conv.id}`, delete: true });
+    }
+    for (const name of PRIVATE_DOCS) writes.push({ path: `users/${uid}/private/${name}`, delete: true });
+    const username = prof?.data()?.username ?? req.username;
+    if (typeof username === 'string' && username) writes.push({ path: `usernames/${username}`, delete: true });
+    writes.push({ path: `users/${uid}`, delete: true });
+    // Firestore takes up to 500 writes at once; the request is marked done with the last batch
+    const done = { path: `deleteRequests/${uid}`, data: { uid, requestedAt: Timestamp.fromMillis(req.requestedAt || Date.now()), deleteAt: Timestamp.fromMillis(req.deleteAt), status: 'deleted' }, transforms: [serverTime('doneAt')] };
+    for (let i = 0; i < writes.length; i += 450) {
+      const part = writes.slice(i, i + 450);
+      await commit(i + 450 >= writes.length ? [...part, done] : part);
+    }
+  } catch (e) {
+    if (e instanceof ChatError) throw e;
+    throw new ChatError(t('Could not delete the account. Check your connection and try again.'));
+  }
+}
+
 // ---------- profiles and usernames ----------
 
-const toProfile = (uid: string, d: DocumentData): Profile => ({ uid, name: d.name, username: d.username, role: d.role, lastSeen: ms(d.lastSeen) || undefined, findable: d.findable !== false });
+const toProfile = (uid: string, d: DocumentData): Profile => ({ uid, name: d.name, username: d.username, role: d.role, lastSeen: ms(d.lastSeen) || undefined, findable: d.findable !== false, deleteAt: ms(d.deleteAt) || undefined });
 
 export async function isUsernameFree(username: string): Promise<boolean> {
   return !(await getDoc(doc(db(), 'usernames', username))).exists();

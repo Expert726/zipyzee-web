@@ -34,9 +34,13 @@ export function encode(v: unknown): Value {
 
 const fields = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).filter(([, x]) => x !== undefined).map(([k, x]) => [k, encode(x)]));
 
-export type Transform = { fieldPath: string; setToServerValue: 'REQUEST_TIME' } | { fieldPath: string; increment: Value };
+export type Transform =
+  | { fieldPath: string; setToServerValue: 'REQUEST_TIME' }
+  | { fieldPath: string; increment: Value }
+  | { fieldPath: string; removeAllFromArray: { values: Value[] } };
 export const serverTime = (fieldPath: string): Transform => ({ fieldPath, setToServerValue: 'REQUEST_TIME' });
 export const plusOne = (fieldPath: string): Transform => ({ fieldPath, increment: { integerValue: '1' } });
+export const removeFromArray = (fieldPath: string, ...values: unknown[]): Transform => ({ fieldPath, removeAllFromArray: { values: values.map(encode) } });
 
 export type Write = {
   /** e.g. chats/abc/messages/xyz */
@@ -48,6 +52,8 @@ export type Write = {
   /** the document must (true) or must not (false) exist already */
   exists?: boolean;
 };
+/** Removes a document. */
+export type Delete = { path: string; delete: true };
 
 /** A failed commit, with Firestore's status (PERMISSION_DENIED, RESOURCE_EXHAUSTED...) or 'network'. */
 export class CommitError extends Error {
@@ -59,14 +65,19 @@ export class CommitError extends Error {
   }
 }
 
-export async function commit(writes: Write[], signal?: AbortSignal): Promise<void> {
+/**
+ * Several writes that land together. `anonymous`: allowed without a login (AirShare: no account needed; the rules
+ * decide). Otherwise the person must be signed in, and the call carries their Google login.
+ */
+export async function commit(writes: (Write | Delete)[], opts: { signal?: AbortSignal; anonymous?: boolean } = {}): Promise<void> {
   const user = getAuth(firebase()).currentUser;
-  if (!user) throw new CommitError('UNAUTHENTICATED', 'Not signed in');
-  const headers: Record<string, string> = { 'Content-Type': 'application/json', Authorization: `Bearer ${await user.getIdToken()}` };
+  if (!user && !opts.anonymous) throw new CommitError('UNAUTHENTICATED', 'Not signed in');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (user) headers.Authorization = `Bearer ${await user.getIdToken()}`;
   const check = await appCheckToken();
   if (check) headers['X-Firebase-AppCheck'] = check;
   const body = {
-    writes: writes.map((w) => ({
+    writes: writes.map((w) => 'delete' in w ? { delete: `${ROOT}/${w.path}` } : ({
       update: { name: `${ROOT}/${w.path}`, fields: fields(w.data) },
       ...(w.mask ? { updateMask: { fieldPaths: w.mask } } : {}),
       ...(w.transforms?.length ? { updateTransforms: w.transforms } : {}),
@@ -75,7 +86,7 @@ export async function commit(writes: Write[], signal?: AbortSignal): Promise<voi
   };
   let res: Response;
   try {
-    res = await fetch(`https://firestore.googleapis.com/v1/${ROOT}:commit?key=${FIREBASE_CONFIG.apiKey}`, { method: 'POST', headers, body: JSON.stringify(body), signal });
+    res = await fetch(`https://firestore.googleapis.com/v1/${ROOT}:commit?key=${FIREBASE_CONFIG.apiKey}`, { method: 'POST', headers, body: JSON.stringify(body), signal: opts.signal });
   } catch (e) {
     throw new CommitError('network', String((e as Error)?.message ?? e));
   }

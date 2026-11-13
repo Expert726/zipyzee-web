@@ -3,6 +3,7 @@ import { isLanguage, tr } from '@/i18n';
 import { Suspense } from 'react';
 import { HomeTabs, HomeTools } from '@/components/HomeTabs';
 import { QuickActions } from '@/components/QuickActions';
+import { ToolSearchBox } from '@/components/nav/ToolSearch';
 import { TOOL_COUNT } from '@/tools/registry';
 
 export default async function HomePage({ params }: PageProps<'/[lang]'>) {
@@ -15,6 +16,10 @@ export default async function HomePage({ params }: PageProps<'/[lang]'>) {
         <h1 className="text-[30px] sm:text-[44px] leading-tight font-semibold tracking-[-0.03em] max-w-3xl">{t('{count} free tools for PDFs, photos and scans', { count: TOOL_COUNT })}</h1>
         <p className="text-[16px] sm:text-[17px] text-muted max-w-xl mb-4">{t('Merge, split and compress PDFs, resize and convert photos. Free, and your files never leave your computer.')}</p>
         <QuickActions lang={lang} />
+        {/* quick access to any tool, right under the three cards */}
+        <div className="w-full flex justify-center mt-2">
+          <ToolSearchBox />
+        </div>
         <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[13px] text-muted mt-4">
           <li className="flex items-center gap-1.5"><ShieldCheck size={16} className="text-brand" aria-hidden="true" />{t('Files stay on your computer')}</li>
           <li className="flex items-center gap-1.5"><Zap size={16} className="text-brand" aria-hidden="true" />{t('No sign-up')}</li>
